@@ -1,0 +1,12 @@
+export const dateFrom = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+export const dateKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+export const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+export const ua = d => d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+export const DAYS = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', "П'ятниця", 'Субота'];
+export const DAYS_SHORT = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+export const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+export const getMonday = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); const w = x.getDay(); x.setDate(x.getDate() + (w === 0 ? -6 : 1 - w)); return x; };
+export const mins = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+export const hhmm = n => `${String(Math.floor(n / 60)).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`;
+export const endTime = (start, dur) => hhmm(mins(start) + dur);
+export const inside = (d, a, b) => { const k = dateKey(d); return k >= a && k <= b; };
