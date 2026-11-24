@@ -5,6 +5,9 @@ import { askNotice, askConfirm } from '../core/ui.js';
 import { openLessonForm } from './lessonForm.js';
 import { saveHomework } from '../domain/homework.js';
 import { dayItems, vacationOf, statusClass, createLesson, findLesson, updateLesson, deleteLesson } from '../domain/lessons.js';
+import { lessonTopic } from '../domain/plan.js';
+import { openActivityForm } from './activityForm.js';
+import { createActivity, updateActivity, deleteActivity } from '../domain/activities.js';
 
 let mode = 'week', anchor = new Date(); // стан навігації живе між перемальовуваннями
 const pad = n => String(n).padStart(2, '0');
@@ -14,10 +17,11 @@ function chip(it, compact) {
   if (it.kind === 'lesson') {
     const l = it.data, s = it.student, sub = l.status !== 'Заплановано' && !l.auto ? l.status : '';
     const hw = l.id != null && store.get().homework.some(h => h.lessonId === l.id);
-    return html`<div class="chip ${statusClass(l)} ${it.clash ? 'conflict' : ''}" style="border-left-color:${s.color}" data-act="open" data-lid="${l.id ?? ''}" data-sid="${s.id}" data-date="${l.date}" data-slot="${l.slot ?? ''}" title="${s.name} ${t}${sub ? ' · ' + sub : ''}${hw ? ' · є ДЗ' : ''}"><b>${s.firstName}</b>${hw ? ' 📝' : ''} ${t}${!compact && (sub || warn) ? html`<small>${[sub, warn].filter(Boolean).join(' · ')}</small>` : ''}</div>`;
+    const topic = ['Перенесено', 'Скасовано'].includes(l.status) ? '' : lessonTopic(s, l);
+    return html`<div class="chip ${statusClass(l)} ${it.clash ? 'conflict' : ''}" style="border-left-color:${s.color}" data-act="open" data-lid="${l.id ?? ''}" data-sid="${s.id}" data-date="${l.date}" data-slot="${l.slot ?? ''}" title="${s.name} ${t}${topic ? ' · ' + topic : ''}${sub ? ' · ' + sub : ''}${hw ? ' · є ДЗ' : ''}"><b>${s.firstName}</b>${hw ? ' 📝' : ''} ${t}${!compact && topic ? html`<small class="ctopic">${topic}</small>` : ''}${!compact && (sub || warn) ? html`<small>${[sub, warn].filter(Boolean).join(' · ')}</small>` : ''}</div>`;
   }
   const a = it.data;
-  return html`<div class="chip act ${it.clash ? 'conflict' : ''}" title="${a.title} ${t}"><b>${a.title}</b> ${t}${!compact && warn ? html`<small>${warn}</small>` : ''}</div>`;
+  return html`<div class="chip act ${it.clash ? 'conflict' : ''}" data-act="openAct" data-aid="${a.id}" title="${a.title} ${t}"><b>${a.title}</b> ${t}${!compact && warn ? html`<small>${warn}</small>` : ''}</div>`;
 }
 
 const LEGEND = [['#e8eefc', 'заплановано'], ['#e3f4e6', 'проведено'], ['#fde4e4', 'пропустив учень'], ['#efe3fb', 'пропустив викладач'], ['#fff1dc', 'не відмічено'], ['#eee', 'справа викладача']];
@@ -28,6 +32,7 @@ const defaultDate = () => {
   if (mode === 'week') { const ws = getMonday(anchor); return dateKey(t >= ws && t < addDays(ws, 7) ? t : ws); }
   return dateKey(t.getMonth() === anchor.getMonth() && t.getFullYear() === anchor.getFullYear() ? t : new Date(anchor.getFullYear(), anchor.getMonth(), 1));
 };
+
 async function addLesson(date) {
   const v = await openLessonForm(date); if (!v) return;
   anchor = dateFrom(v.date); // після збереження календар переходить до дати нового заняття
@@ -44,6 +49,26 @@ async function editLesson(ref) {
     } else {
       anchor = dateFrom(v.date);
       store.update(s => { const rec = updateLesson(s, l, v); saveHomework(s, rec, v.homework, l.id); });
+    }
+  } catch (e) { askNotice(e.message); }
+}
+
+async function addActivity(date) {
+  const v = await openActivityForm(date); if (!v) return;
+  anchor = dateFrom(v.date);
+  try { store.update(s => createActivity(s, v)); } catch (e) { askNotice(e.message); }
+}
+
+async function editActivity(id) {
+  const a = store.get().activities.find(x => x.id === id); if (!a) return askNotice('Справу не знайдено.');
+  const v = await openActivityForm(a.date, a); if (!v) return;
+  try {
+    if (v.delete) {
+      if (!await askConfirm('Видалити цю справу?', 'Видалити')) return;
+      store.update(s => deleteActivity(s, id));
+    } else {
+      anchor = dateFrom(v.date);
+      store.update(s => updateActivity(s, id, v));
     }
   } catch (e) { askNotice(e.message); }
 }
@@ -72,7 +97,7 @@ export function renderCalendar(el) {
     body = html`<div class="mgrid">${DAYS_SHORT.slice(1).concat(DAYS_SHORT[0]).map(n => html`<div class="mh">${n}</div>`)}${cells}</div>`;
   }
   mount(el, html`<div class="cal-head"><div><h2>Календар</h2><div class="muted">${title}</div></div>
-    <div class="row"><button class="primary" data-act="add">+ Заняття</button><button data-act="prev" title="Назад">‹</button><button class="todaybtn" data-act="today" title="Сьогодні">${new Date().getDate()}</button><button data-act="next" title="Вперед">›</button>
+    <div class="row"><button class="primary" data-act="add">+ Заняття</button><button data-act="addact">+ Справа</button><button data-act="prev" title="Назад">‹</button><button class="todaybtn" data-act="today" title="Сьогодні">${new Date().getDate()}</button><button data-act="next" title="Вперед">›</button>
     <button class="${mode === 'week' ? 'primary' : ''}" data-act="week">Тиждень</button><button class="${mode === 'month' ? 'primary' : ''}" data-act="month">Місяць</button></div></div>
     ${body}<div class="legend">${LEGEND.map(([c, t]) => html`<span><i style="background:${c}"></i>${t}</span>`)}</div>`);
 
@@ -84,6 +109,8 @@ export function renderCalendar(el) {
     today: () => { anchor = new Date(); renderCalendar(el); },
     week: () => { const t = new Date(); if (mode !== 'week') anchor = anchor.getFullYear() === t.getFullYear() && anchor.getMonth() === t.getMonth() ? t : new Date(anchor.getFullYear(), anchor.getMonth(), 1); mode = 'week'; renderCalendar(el); },
     month: () => { mode = 'month'; renderCalendar(el); },
-    day: b => { mode = 'week'; anchor = new Date(b.dataset.day + 'T00:00:00'); renderCalendar(el); }
+    day: b => { mode = 'week'; anchor = new Date(b.dataset.day + 'T00:00:00'); renderCalendar(el); },
+    addact: () => addActivity(defaultDate()),
+    openAct: b => editActivity(+b.dataset.aid),
   });
 }

@@ -8,6 +8,7 @@ import { renderHome } from './views/home.js';
 import { seed } from './demo/seed.js';
 import { renderStudent } from './views/student.js';
 import { renderModules } from './views/modules.js';
+import { renderMaterials } from './views/materials.js';
 
 const root = document.getElementById('app'), USER_KEY = 'tutor.user';
 const savedUser = () => { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch { return null; } };
@@ -21,6 +22,7 @@ function paintView() { const v = document.getElementById('view'); if (v && rende
 router.route('/', () => setView(renderHome));
 router.route('/student/:id', ({ id }) => setView(el => renderStudent(el, +id)));
 router.route('/modules', () => setView(renderModules, 'modules'));
+router.route('/materials', () => setView(renderMaterials, 'materials'));
 
 // --- статус збереження ---
 const LABELS = { loading: ['Завантаження…', ''], saved: ['Збережено', 'ok'], dirty: ['Є зміни…', 'warn'], saving: ['Зберігаю…', 'warn'], offline: ['Немає зв’язку', 'bad'], error: ['Помилка збереження', 'bad'], conflict: ['Конфлікт', 'bad'], auth: ['Потрібен вхід', 'bad'], demo: ['Демо: дані не зберігаються', 'warn'] };
@@ -52,7 +54,7 @@ function startDemo() { store.enterDemo(seed()); startApp(); }
 
 function startApp() {
   mount(root, html`<header class="top"><h1>Система репетитора</h1>
-    <nav class="nav"><a href="#/" data-nav="home">Учні й календар</a><a href="#/modules" data-nav="modules">Модулі навчання</a></nav>
+    <nav class="nav"><a href="#/" data-nav="home">Учні й календар</a><a href="#/modules" data-nav="modules">Модулі навчання</a><a href="#/materials" data-nav="materials">Матеріали</a></nav>
     <span id="status" class="pill"></span>
     <span class="who">${store.isDemo() ? 'Демо-режим' : user.email}</span>
     <button data-act="export">Експорт</button><button data-act="import">Імпорт</button><button data-act="logout">Вийти</button></header>

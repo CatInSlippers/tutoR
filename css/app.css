@@ -68,6 +68,7 @@ dialog::backdrop{background:#0006}
 @media(max-width:900px){.split{grid-template-columns:1fr}.wk{grid-template-columns:1fr}.mcell{min-height:70px}.list{max-height:none}}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px}
+.grid3 input{height: 5vh}
 label.chk{display:flex;align-items:center;gap:6px;color:#222;font-size:14px}.chk input{width:auto}
 .warn{background:#fff3cd;color:#6b5200;border:1px solid #f0dc9a;border-radius:8px;padding:8px 12px;margin-top:12px;font-size:13px}
 .addday{margin-top:auto;border:1px dashed #ccc;color:#888;background:transparent;padding:2px}
@@ -160,16 +161,71 @@ table.hist{width:100%;border-collapse:collapse;font-size:13px}
 .card summary:hover{color:#1e293b}
 @media (max-width:600px){.slot{flex-wrap:wrap;gap:8px}.slot .spacer{flex-basis:100%}}
 
-
 /* план занять */
 .pl-wrap{max-height:70vh;overflow:auto}
 .pl th{position:sticky;top:0;z-index:1}
 .pl td{vertical-align:top}
+.pl td > :first-child{margin-top:0}
+.pl-det,
+.pl-det > summary{margin:0;padding-top:0}
+.pl-det > summary{display:list-item;cursor:pointer;font-size:13px;color:#3a4ab0;line-height:1.35}
 .pl-next td{background:#f3f6ff}
 
 /* модулі навчання */
-.catmod{margin-bottom:14px}
-.cattopic{margin:8px 0 0 28px;padding:8px 0 4px;border-top:1px solid #f0f0f0}
-.catskill{display:flex;align-items:center;gap:6px;padding:3px 0 3px 18px;font-size:14px}
-.catskill .spacer::before{content:'•';color:#aaa;margin-right:8px}
-.wt{color:#e6892e;letter-spacing:1px;font-size:12px;margin-left:8px;white-space:nowrap;font-weight:400}
+.ct{padding:10px 0 10px 28px;border-top:1px solid #f0f0f0}
+.ct-name{font-weight:600}
+.ct-sk{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.skchip{background:#f2f4f8;border-radius:10px;padding:2px 10px;font-size:13px;color:#445}
+dialog:has(#tlist){width:min(760px,94vw)}
+.tl-head{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 8px}
+.tr{border:1px solid #e6e8ee;border-radius:10px;padding:8px;margin-bottom:8px;background:#fafbfd}
+.tr-head{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.tr-name{flex:1;min-width:0}
+.tr-w{width:auto}
+.tr-sk{width:100%;box-sizing:border-box}
+
+/* модулі: підтеми */
+.ct-sum{font-size:12px;margin-left:6px}
+.cs{margin:8px 0 0 18px}
+.cs-name{font-size:14px}
+.wt.inh{color:#c9ccd3}
+dialog:has(#tlist){max-height:90vh;overflow:auto}
+.sr{margin:6px 0 0 18px;padding:6px;border:1px dashed #d9dce4;border-radius:8px;background:#fff}
+.sr-head{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.sr-name{flex:1;min-width:0}
+.sr-w{width:auto}
+.sr-sk{width:100%;box-sizing:border-box}
+
+
+/* створення розкладу тем */
+dialog:has(#gList){width:min(820px,94vw);max-height:90vh;overflow:auto}
+.gen-top{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.gen-top>div{flex:1;min-width:180px}
+.gl{border:1px solid #e6e8ee;border-radius:10px;padding:8px 10px;margin-top:8px}
+.gl-date{display:flex;gap:8px;align-items:baseline;margin-bottom:6px}
+.gl-w{margin-left:auto;font-size:12px}
+.gl-add{width:auto;max-width:100%;margin-top:6px}
+.gwarn{background:#fff8e6;border-radius:8px;padding:6px 10px;margin:8px 0;font-size:13px}
+.pl-t{font-size:12px}
+.pl-det summary{cursor:pointer;font-size:13px;color:#3a4ab0}
+.pl-ul{margin:4px 0 0 16px;padding:0;font-size:12px;color:#555}
+.pl-sh{font-size:12px;font-weight:600;margin-top:6px}
+.tchip{display:inline-flex;align-items:center;gap:4px;background:#eef1ff;border-radius:10px;padding:2px 4px 2px 10px;margin:2px;font-size:13px}
+.tchip button{border:0;background:transparent;padding:0 4px;color:#c62828;cursor:pointer;line-height:1}
+
+.chip .ctopic{display:block;font-weight:600;font-size:11px;white-space:normal;line-height:1.25;margin-top:2px}
+.planbox{background:#f3f6ff;border-radius:8px;padding:8px 10px;margin-top:8px;font-size:13px}
+
+/* матеріали */
+.mat-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.mat-tools input[type=search]{flex:1;min-width:220px}
+.mat-arch td{color:#999}
+.stu-pick{display:flex;flex-wrap:wrap;gap:6px 16px;margin:4px 0}
+.stu-chips{display:flex;flex-wrap:wrap;gap:4px;min-height:28px;margin:4px 0}
+.stu-add{position:relative}
+.stu-sug{position:absolute;left:0;right:0;top:100%;z-index:5;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.12);max-height:240px;overflow:auto;padding:4px}
+.sug{display:block;width:100%;text-align:left;border:0;background:transparent;padding:6px 8px;border-radius:6px;cursor:pointer}
+.sug:hover{background:#eef1ff}
+.sug-more{padding:6px 8px;font-size:12px}
+
+.ssearch{width:100%;box-sizing:border-box;margin:10px 0 4px}

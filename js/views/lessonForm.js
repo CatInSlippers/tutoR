@@ -5,6 +5,7 @@ import { dateFrom, dateKey, addDays, hhmm, mins, ua } from '../core/dates.js';
 import { STATUSES, dayItems, isLive } from '../domain/lessons.js';
 import { HW_STATUSES, homeworkOf } from '../domain/homework.js';
 import { currentSlots } from '../domain/schedule.js';
+import { plannedOn } from '../domain/plan.js';
 
 const WEEKLY = ['Щонеділі', 'Щопонеділка', 'Щовівторка', 'Щосереди', 'Щочетверга', "Щоп'ятниці", 'Щосуботи'];
 
@@ -13,6 +14,9 @@ const WEEKLY = ['Щонеділі', 'Щопонеділка', 'Щовівтор�
 export async function openLessonForm(date, lesson = null) {
   const st = store.get(), edit = !!lesson, cur = edit ? st.students.find(x => x.id === lesson.studentId) : st.students[0], slot = cur && currentSlots(cur)[0];
   const L = lesson || {}, H = edit ? homeworkOf(st, L.id) : null;
+  const pe = edit && cur ? plannedOn(cur, L.date) : null; // запланована тема на дату цього заняття
+  const planText = pe ? pe.items.map(i => i.name + (i.parts > 1 ? ` (${i.part}/${i.parts})` : '')).join(', ') : '';
+
   const inner = html`
     <label>Учень</label>
     <select name="student" ${edit ? 'disabled' : ''}>${st.students.map(x => html`<option value="${x.id}" ${x === cur ? 'selected' : ''}>${x.name}</option>`)}${edit ? '' : html`<option value="new" ${cur ? '' : 'selected'}>+ Новий учень (пробне заняття)…</option>`}</select>
@@ -25,8 +29,10 @@ export async function openLessonForm(date, lesson = null) {
     <label>Статус</label><select name="status">${STATUSES.map(x => html`<option ${x === (L.status || 'Заплановано') ? 'selected' : ''}>${x}</option>`)}</select>
     ${edit && L.regular ? html`<p class="muted" style="margin:12px 0 0">Регулярне заняття за розкладом. Якщо змінити дату, на старій даті воно стане «Перенесено», а на новій з’явиться окреме заняття.</p>`
       : html`<label class="chk" style="margin-top:12px"><input type="checkbox" name="regular"> ${edit ? 'Зробити регулярним' : 'Регулярне заняття'}: <b id="regTxt"></b></label>`}
-    <label>Тема</label><input name="topic" value="${L.topic && L.topic !== 'Заняття' ? L.topic : ''}">
-    <label>Коментар</label><textarea name="comment" rows="2">${L.comment || ''}</textarea>
+    <label>Тема</label><input name="topic" value="${L.topic && L.topic !== 'Заняття' ? L.topic : ''}" placeholder="${planText}">
+    ${pe ? html`<div class="planbox"><b>Заплановано:</b>${pe.items.map(i => html`<div>${i.name}${i.parts > 1 ? ` (${i.part}/${i.parts})` : ''}${i.skills.length ? html`<div class="muted">${i.skills.join('; ')}</div>` : ''}</div>`)}
+      <div class="muted" style="margin-top:4px">Якщо поле «Тема» порожнє, на занятті діє запланована тема.</div></div>` : ''}
+      <label>Коментар</label><textarea name="comment" rows="2">${L.comment || ''}</textarea>
     <label class="chk" style="margin-top:12px"><input type="checkbox" name="hw" ${H ? 'checked' : ''}> Домашнє завдання</label>
     <div id="hwBox" ${H ? '' : 'hidden'}>
       <label>Опис завдання</label><textarea name="hw_task" rows="2">${H?.task || ''}</textarea>

@@ -8,6 +8,7 @@ import { scheduleCard, schedHandlers } from './studentSchedule.js';
 import { currentSlots } from '../domain/schedule.js';
 import { finance } from '../domain/finance.js';
 import { planTab, planHandlers } from './studentPlan.js';
+import { studentMaterials } from './materials.js';
 
 const TABS = [['info', 'Основне'], ['hw', 'Домашнє завдання'], ['pay', 'Оплата за заняття'], ['plan', 'План занять']];
 const STAGES = ['Пробний', 'Навчається', 'Закінчив навчання', 'Одноразове заняття'];
@@ -37,8 +38,9 @@ function infoTab(s) {
     <div class="col">
       ${card('Контакти', html`${row('Телефон', s.phone)}${row('Email', s.email)}${row('Опікун', guardian)}`)}
       ${card('Оплата', html`${row('Ціна заняття', `${s.lessonPrice} грн`)}
-        ${row('Тип оплати', s.payType === 'Пакет' ? `Пакет, ${s.packSize} занять` : s.payType)}${row('Спосіб', s.payMethod)}`)}
-    </div>
+      ${row('Тип оплати', s.payType === 'Пакет' ? `Пакет, ${s.packSize} занять` : s.payType)}${row('Спосіб', s.payMethod)}`)}
+      ${card('Матеріали', studentMaterials(s))}
+          </div>
   </div>`;
 }
 
